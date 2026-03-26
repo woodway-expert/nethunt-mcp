@@ -41,10 +41,25 @@ class NetHuntClient:
             "User-Agent": "nethunt-mcp/0.1.0",
         }
 
+    @property
+    def base_url(self) -> str:
+        return self.settings.api_base_url
+
     async def close(self) -> None:
         if self._owns_client and self._client is not None:
             await self._client.aclose()
             self._client = None
+
+    async def request_json(
+        self,
+        method: str,
+        path: str,
+        *,
+        query: QueryParams = None,
+        json_body: JSONMapping | None = None,
+        retryable: bool = False,
+    ) -> Any:
+        return await self._request_json(method.upper(), path, query=query, json_body=json_body, retryable=retryable)
 
     async def get_json(
         self,
@@ -105,7 +120,7 @@ class NetHuntClient:
     async def _get_client(self) -> httpx.AsyncClient:
         if self._client is None:
             self._client = httpx.AsyncClient(
-                base_url=self.settings.api_base_url,
+                base_url=self.base_url,
                 headers=self.default_headers,
                 timeout=self.settings.timeout_seconds,
             )

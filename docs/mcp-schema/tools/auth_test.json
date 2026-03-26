@@ -1,0 +1,14 @@
+{
+  "description": "Validate the configured NetHunt API credentials and return the upstream auth-test payload.",
+  "inputSchema": {
+    "properties": {},
+    "title": "auth_testArguments",
+    "type": "object"
+  },
+  "name": "auth_test",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "auth_testDictOutput",
+    "type": "object"
+  }
+}

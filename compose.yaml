@@ -9,6 +9,6 @@ services:
     environment:
       MCP_TRANSPORT: streamable-http
       MCP_HOST: 0.0.0.0
-      MCP_PORT: 8000
+      MCP_PORT: 18044
     ports:
-      - "8000:8000"
+      - "18044:18044"

@@ -1,0 +1,14 @@
+{
+  "description": "List configured automation kinds, lifecycle operations, editor operations, and sample payloads supported by this MCP server.",
+  "inputSchema": {
+    "properties": {},
+    "title": "list_automation_kindsArguments",
+    "type": "object"
+  },
+  "name": "list_automation_kinds",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "list_automation_kindsDictOutput",
+    "type": "object"
+  }
+}

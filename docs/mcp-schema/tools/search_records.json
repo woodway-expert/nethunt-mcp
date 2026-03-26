@@ -1,0 +1,56 @@
+{
+  "description": "Search records in a folder by text query or record ID and return additive record metadata for authoring and debugging.",
+  "inputSchema": {
+    "properties": {
+      "folder_id": {
+        "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+        "title": "Folder Id",
+        "type": "string"
+      },
+      "limit": {
+        "default": 10,
+        "description": "Maximum number of records to return.",
+        "minimum": 1,
+        "title": "Limit",
+        "type": "integer"
+      },
+      "query": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Free-text query string passed to NetHunt record search.",
+        "title": "Query"
+      },
+      "record_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional record identifier to look up directly through the search endpoint.",
+        "title": "Record Id"
+      }
+    },
+    "required": [
+      "folder_id"
+    ],
+    "title": "search_recordsArguments",
+    "type": "object"
+  },
+  "name": "search_records",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "search_recordsDictOutput",
+    "type": "object"
+  }
+}

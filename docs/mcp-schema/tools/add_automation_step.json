@@ -1,0 +1,60 @@
+{
+  "description": "Add a step to an automation branch through the NetHunt editor RPC wrapper. Requires confirmation.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "branch_id": {
+        "description": "Target branch identifier required by NetHunt editor RPC calls.",
+        "title": "Branch Id",
+        "type": "integer"
+      },
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      },
+      "payload": {
+        "additionalProperties": true,
+        "description": "NetHunt editor payload for the new automation step.",
+        "title": "Payload",
+        "type": "object"
+      },
+      "role": {
+        "description": "NetHunt step role such as `TRIGGER`, `ACTION`, or `SPLIT`.",
+        "title": "Role",
+        "type": "string"
+      },
+      "step_type": {
+        "description": "NetHunt automation step type such as `CREATE_TASK`, `UPDATE_RECORD2`, or `FILTER_RECORD`.",
+        "title": "Step Type",
+        "type": "string"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id",
+      "step_type",
+      "payload",
+      "branch_id",
+      "role"
+    ],
+    "title": "add_automation_stepArguments",
+    "type": "object"
+  },
+  "name": "add_automation_step",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "add_automation_stepDictOutput",
+    "type": "object"
+  }
+}

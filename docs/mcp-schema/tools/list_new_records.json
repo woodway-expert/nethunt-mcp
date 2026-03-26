@@ -1,0 +1,50 @@
+{
+  "description": "Read the NetHunt new-record feed for a folder, preserving feed entries while adding normalized record metadata when possible.",
+  "inputSchema": {
+    "properties": {
+      "folder_id": {
+        "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+        "title": "Folder Id",
+        "type": "string"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional maximum number of items to return when the endpoint supports limiting.",
+        "title": "Limit"
+      },
+      "since": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional feed cursor or timestamp accepted by the underlying NetHunt trigger endpoint.",
+        "title": "Since"
+      }
+    },
+    "required": [
+      "folder_id"
+    ],
+    "title": "list_new_recordsArguments",
+    "type": "object"
+  },
+  "name": "list_new_records",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "list_new_recordsDictOutput",
+    "type": "object"
+  }
+}

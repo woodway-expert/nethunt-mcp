@@ -1,0 +1,42 @@
+{
+  "description": "Update an existing automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      },
+      "payload": {
+        "additionalProperties": true,
+        "description": "Manifest-specific payload for the automation update operation.",
+        "title": "Payload",
+        "type": "object"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id",
+      "payload"
+    ],
+    "title": "update_automationArguments",
+    "type": "object"
+  },
+  "name": "update_automation",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "update_automationDictOutput",
+    "type": "object"
+  }
+}

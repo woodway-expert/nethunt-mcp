@@ -1,0 +1,36 @@
+{
+  "description": "Infer stable field IDs for a folder by scanning existing automation imports and returning who references each field.",
+  "inputSchema": {
+    "properties": {
+      "folder_id": {
+        "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+        "title": "Folder Id",
+        "type": "string"
+      },
+      "kind": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional automation kind filter. Use `null` to list all configured automation kinds.",
+        "title": "Kind"
+      }
+    },
+    "required": [
+      "folder_id"
+    ],
+    "title": "list_automation_field_referencesArguments",
+    "type": "object"
+  },
+  "name": "list_automation_field_references",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "list_automation_field_referencesDictOutput",
+    "type": "object"
+  }
+}

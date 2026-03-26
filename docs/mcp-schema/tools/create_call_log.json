@@ -1,0 +1,55 @@
+{
+  "description": "Attach a call-log entry to an existing NetHunt record.",
+  "inputSchema": {
+    "properties": {
+      "duration": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional call duration in seconds.",
+        "title": "Duration"
+      },
+      "record_id": {
+        "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+        "title": "Record Id",
+        "type": "string"
+      },
+      "text": {
+        "description": "Plain-text content to store in the comment or call-log body.",
+        "title": "Text",
+        "type": "string"
+      },
+      "time": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional ISO-style timestamp string to attach to the call log.",
+        "title": "Time"
+      }
+    },
+    "required": [
+      "record_id",
+      "text"
+    ],
+    "title": "create_call_logArguments",
+    "type": "object"
+  },
+  "name": "create_call_log",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "create_call_logDictOutput",
+    "type": "object"
+  }
+}

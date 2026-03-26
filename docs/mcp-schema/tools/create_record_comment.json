@@ -1,0 +1,29 @@
+{
+  "description": "Attach a plain-text comment to an existing NetHunt record.",
+  "inputSchema": {
+    "properties": {
+      "record_id": {
+        "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+        "title": "Record Id",
+        "type": "string"
+      },
+      "text": {
+        "description": "Plain-text content to store in the comment or call-log body.",
+        "title": "Text",
+        "type": "string"
+      }
+    },
+    "required": [
+      "record_id",
+      "text"
+    ],
+    "title": "create_record_commentArguments",
+    "type": "object"
+  },
+  "name": "create_record_comment",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "create_record_commentDictOutput",
+    "type": "object"
+  }
+}

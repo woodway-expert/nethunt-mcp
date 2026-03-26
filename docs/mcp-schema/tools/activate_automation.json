@@ -1,0 +1,35 @@
+{
+  "description": "Activate an automation through the NetHunt editor RPC wrapper. Requires confirmation.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id"
+    ],
+    "title": "activate_automationArguments",
+    "type": "object"
+  },
+  "name": "activate_automation",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "activate_automationDictOutput",
+    "type": "object"
+  }
+}

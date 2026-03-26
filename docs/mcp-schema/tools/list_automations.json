@@ -1,0 +1,28 @@
+{
+  "description": "List automations for one configured kind or for all kinds, including normalized imports and field reference summaries.",
+  "inputSchema": {
+    "properties": {
+      "kind": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional automation kind filter. Use `null` to list all configured automation kinds.",
+        "title": "Kind"
+      }
+    },
+    "title": "list_automationsArguments",
+    "type": "object"
+  },
+  "name": "list_automations",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "list_automationsDictOutput",
+    "type": "object"
+  }
+}

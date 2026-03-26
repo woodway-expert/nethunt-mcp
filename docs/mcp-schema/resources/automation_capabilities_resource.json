@@ -1,0 +1,6 @@
+{
+  "description": "JSON snapshot of configured automation kinds and capabilities, equivalent to `list_automation_kinds()`.",
+  "mimeType": "text/plain",
+  "name": "automation_capabilities_resource",
+  "uri": "nethunt://automations/capabilities"
+}

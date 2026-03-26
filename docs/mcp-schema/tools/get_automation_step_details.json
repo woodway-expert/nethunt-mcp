@@ -1,0 +1,50 @@
+{
+  "description": "Read detailed information for one automation step and enrich the response with branch IDs, step IDs, and detected field references when available.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      },
+      "list_options": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional NetHunt list-options object passed through to the step-details RPC.",
+        "title": "List Options"
+      },
+      "step_num": {
+        "description": "Automation step number within the branch.",
+        "minimum": 0,
+        "title": "Step Num",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id",
+      "step_num"
+    ],
+    "title": "get_automation_step_detailsArguments",
+    "type": "object"
+  },
+  "name": "get_automation_step_details",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "get_automation_step_detailsDictOutput",
+    "type": "object"
+  }
+}

@@ -1,0 +1,1375 @@
+{
+  "tools": [
+    {
+      "description": "Validate the configured NetHunt API credentials and return the upstream auth-test payload.",
+      "inputSchema": {
+        "properties": {},
+        "title": "auth_testArguments",
+        "type": "object"
+      },
+      "name": "auth_test",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "auth_testDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "List NetHunt folders the current user can read. Use this before field, record, or automation authoring work.",
+      "inputSchema": {
+        "properties": {
+          "refresh": {
+            "default": false,
+            "description": "Refresh cached discovery metadata instead of reusing the last cached response.",
+            "title": "Refresh",
+            "type": "boolean"
+          }
+        },
+        "title": "list_readable_foldersArguments",
+        "type": "object"
+      },
+      "name": "list_readable_folders",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_readable_foldersDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "List NetHunt folders the current user can write to when creating records or authoring actions.",
+      "inputSchema": {
+        "properties": {
+          "refresh": {
+            "default": false,
+            "description": "Refresh cached discovery metadata instead of reusing the last cached response.",
+            "title": "Refresh",
+            "type": "boolean"
+          }
+        },
+        "title": "list_writable_foldersArguments",
+        "type": "object"
+      },
+      "name": "list_writable_folders",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_writable_foldersDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "List fields for a folder and enrich them with stable IDs, option metadata, reference counts, and provenance when available.",
+      "inputSchema": {
+        "properties": {
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "refresh": {
+            "default": false,
+            "description": "Refresh cached discovery metadata instead of reusing the last cached response.",
+            "title": "Refresh",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "title": "list_folder_fieldsArguments",
+        "type": "object"
+      },
+      "name": "list_folder_fields",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_folder_fieldsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Infer stable field IDs for a folder by scanning existing automation imports and returning who references each field.",
+      "inputSchema": {
+        "properties": {
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional automation kind filter. Use `null` to list all configured automation kinds.",
+            "title": "Kind"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "title": "list_automation_field_referencesArguments",
+        "type": "object"
+      },
+      "name": "list_automation_field_references",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_automation_field_referencesDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Fetch a single NetHunt record by folder and record ID, with additive field metadata when available.",
+      "inputSchema": {
+        "properties": {
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "record_id": {
+            "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+            "title": "Record Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder_id",
+          "record_id"
+        ],
+        "title": "get_recordArguments",
+        "type": "object"
+      },
+      "name": "get_record",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "get_recordDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Search records in a folder by text query or record ID and return additive record metadata for authoring and debugging.",
+      "inputSchema": {
+        "properties": {
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "limit": {
+            "default": 10,
+            "description": "Maximum number of records to return.",
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Free-text query string passed to NetHunt record search.",
+            "title": "Query"
+          },
+          "record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional record identifier to look up directly through the search endpoint.",
+            "title": "Record Id"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "title": "search_recordsArguments",
+        "type": "object"
+      },
+      "name": "search_records",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "search_recordsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Read the NetHunt new-record feed for a folder, preserving feed entries while adding normalized record metadata when possible.",
+      "inputSchema": {
+        "properties": {
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional maximum number of items to return when the endpoint supports limiting.",
+            "title": "Limit"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional feed cursor or timestamp accepted by the underlying NetHunt trigger endpoint.",
+            "title": "Since"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "title": "list_new_recordsArguments",
+        "type": "object"
+      },
+      "name": "list_new_records",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_new_recordsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Read the NetHunt updated-record feed for a folder, optionally filtered by field names.",
+      "inputSchema": {
+        "properties": {
+          "field_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional list of exact field names to filter update or change feeds by.",
+            "title": "Field Names"
+          },
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional maximum number of items to return when the endpoint supports limiting.",
+            "title": "Limit"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional feed cursor or timestamp accepted by the underlying NetHunt trigger endpoint.",
+            "title": "Since"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "title": "list_updated_recordsArguments",
+        "type": "object"
+      },
+      "name": "list_updated_records",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_updated_recordsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Read record-change events for a folder or a single record, optionally filtered by field names.",
+      "inputSchema": {
+        "properties": {
+          "field_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional list of exact field names to filter update or change feeds by.",
+            "title": "Field Names"
+          },
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional maximum number of items to return when the endpoint supports limiting.",
+            "title": "Limit"
+          },
+          "record_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional record identifier to narrow a record-change feed to one record.",
+            "title": "Record Id"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional feed cursor or timestamp accepted by the underlying NetHunt trigger endpoint.",
+            "title": "Since"
+          }
+        },
+        "required": [
+          "folder_id"
+        ],
+        "title": "list_record_changesArguments",
+        "type": "object"
+      },
+      "name": "list_record_changes",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_record_changesDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Create a new record in a folder from a field-name to value mapping.",
+      "inputSchema": {
+        "properties": {
+          "fields": {
+            "additionalProperties": true,
+            "description": "Mapping of NetHunt field names to values for the new record.",
+            "title": "Fields",
+            "type": "object"
+          },
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "time_zone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional IANA time zone name such as `Europe/Kiev` used when creating records.",
+            "title": "Time Zone"
+          }
+        },
+        "required": [
+          "folder_id",
+          "fields"
+        ],
+        "title": "create_recordArguments",
+        "type": "object"
+      },
+      "name": "create_record",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "create_recordDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Update an existing record using set/add/remove field actions expressed by field name.",
+      "inputSchema": {
+        "properties": {
+          "add_fields": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Field-name to value mapping for additive updates.",
+            "title": "Add Fields"
+          },
+          "overwrite_default": {
+            "default": false,
+            "description": "When true, update actions overwrite fields by default unless an individual action says otherwise.",
+            "title": "Overwrite Default",
+            "type": "boolean"
+          },
+          "record_id": {
+            "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+            "title": "Record Id",
+            "type": "string"
+          },
+          "remove_fields": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Field-name to value mapping for remove actions.",
+            "title": "Remove Fields"
+          },
+          "set_fields": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Field-name to value mapping for overwrite-style updates.",
+            "title": "Set Fields"
+          }
+        },
+        "required": [
+          "record_id"
+        ],
+        "title": "update_recordArguments",
+        "type": "object"
+      },
+      "name": "update_record",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "update_recordDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Attach a plain-text comment to an existing NetHunt record.",
+      "inputSchema": {
+        "properties": {
+          "record_id": {
+            "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+            "title": "Record Id",
+            "type": "string"
+          },
+          "text": {
+            "description": "Plain-text content to store in the comment or call-log body.",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "record_id",
+          "text"
+        ],
+        "title": "create_record_commentArguments",
+        "type": "object"
+      },
+      "name": "create_record_comment",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "create_record_commentDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Attach a call-log entry to an existing NetHunt record.",
+      "inputSchema": {
+        "properties": {
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional call duration in seconds.",
+            "title": "Duration"
+          },
+          "record_id": {
+            "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+            "title": "Record Id",
+            "type": "string"
+          },
+          "text": {
+            "description": "Plain-text content to store in the comment or call-log body.",
+            "title": "Text",
+            "type": "string"
+          },
+          "time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional ISO-style timestamp string to attach to the call log.",
+            "title": "Time"
+          }
+        },
+        "required": [
+          "record_id",
+          "text"
+        ],
+        "title": "create_call_logArguments",
+        "type": "object"
+      },
+      "name": "create_call_log",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "create_call_logDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Delete a record. This tool always requires explicit `confirm=true` and returns a preview before execution.",
+      "inputSchema": {
+        "properties": {
+          "confirm": {
+            "default": false,
+            "description": "Explicit confirmation flag required for destructive delete operations.",
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "folder_id": {
+            "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+            "title": "Folder Id",
+            "type": "string"
+          },
+          "preview_only": {
+            "default": false,
+            "description": "When true, only compute the delete preview and do not execute the delete.",
+            "title": "Preview Only",
+            "type": "boolean"
+          },
+          "record_id": {
+            "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+            "title": "Record Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder_id",
+          "record_id"
+        ],
+        "title": "delete_recordArguments",
+        "type": "object"
+      },
+      "name": "delete_record",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "delete_recordDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Execute an allowlisted raw GET helper for gaps not yet covered by higher-level MCP tools.",
+      "inputSchema": {
+        "properties": {
+          "operation": {
+            "description": "Name of an allowlisted raw operation defined by this MCP server.",
+            "title": "Operation",
+            "type": "string"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional raw parameter object, including path placeholders and query values.",
+            "title": "Params"
+          }
+        },
+        "required": [
+          "operation"
+        ],
+        "title": "raw_getArguments",
+        "type": "object"
+      },
+      "name": "raw_get",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "raw_getDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Execute an allowlisted raw POST helper. This always requires `confirm_write=true` to perform the mutation.",
+      "inputSchema": {
+        "properties": {
+          "body": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional raw request body object for the allowlisted POST operation.",
+            "title": "Body"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "operation": {
+            "description": "Name of an allowlisted raw operation defined by this MCP server.",
+            "title": "Operation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation"
+        ],
+        "title": "raw_postArguments",
+        "type": "object"
+      },
+      "name": "raw_post",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "raw_postDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "List configured automation kinds, lifecycle operations, editor operations, and sample payloads supported by this MCP server.",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_automation_kindsArguments",
+        "type": "object"
+      },
+      "name": "list_automation_kinds",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_automation_kindsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "List automations for one configured kind or for all kinds, including normalized imports and field reference summaries.",
+      "inputSchema": {
+        "properties": {
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional automation kind filter. Use `null` to list all configured automation kinds.",
+            "title": "Kind"
+          }
+        },
+        "title": "list_automationsArguments",
+        "type": "object"
+      },
+      "name": "list_automations",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "list_automationsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Fetch one automation by ID. Optionally include a normalized branch graph with stable branch and step IDs.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "include_branches": {
+            "default": false,
+            "description": "When true, include the normalized branch and step graph with stable IDs in the automation response.",
+            "title": "Include Branches",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id"
+        ],
+        "title": "get_automationArguments",
+        "type": "object"
+      },
+      "name": "get_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "get_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Create a new automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "description": "Manifest-specific payload for the automation create operation.",
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "required": [
+          "kind",
+          "payload"
+        ],
+        "title": "create_automationArguments",
+        "type": "object"
+      },
+      "name": "create_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "create_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Update an existing automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "description": "Manifest-specific payload for the automation update operation.",
+            "title": "Payload",
+            "type": "object"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "payload"
+        ],
+        "title": "update_automationArguments",
+        "type": "object"
+      },
+      "name": "update_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "update_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Delete an automation. This tool requires explicit `confirm=true` and returns a preview before execution.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm": {
+            "default": false,
+            "description": "Explicit confirmation flag required for destructive delete operations.",
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "preview_only": {
+            "default": false,
+            "description": "When true, only compute the delete preview and do not execute the delete.",
+            "title": "Preview Only",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id"
+        ],
+        "title": "delete_automationArguments",
+        "type": "object"
+      },
+      "name": "delete_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "delete_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Set the enabled state of an automation through its configured lifecycle operation. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "enabled": {
+            "description": "Target enabled state for the automation.",
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "enabled"
+        ],
+        "title": "set_automation_enabledArguments",
+        "type": "object"
+      },
+      "name": "set_automation_enabled",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "set_automation_enabledDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Activate an automation through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id"
+        ],
+        "title": "activate_automationArguments",
+        "type": "object"
+      },
+      "name": "activate_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "activate_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Deactivate an automation through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id"
+        ],
+        "title": "deactivate_automationArguments",
+        "type": "object"
+      },
+      "name": "deactivate_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "deactivate_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Rename an automation through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable automation name.",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "name"
+        ],
+        "title": "rename_automationArguments",
+        "type": "object"
+      },
+      "name": "rename_automation",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "rename_automationDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Read detailed information for one automation step and enrich the response with branch IDs, step IDs, and detected field references when available.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "list_options": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional NetHunt list-options object passed through to the step-details RPC.",
+            "title": "List Options"
+          },
+          "step_num": {
+            "description": "Automation step number within the branch.",
+            "minimum": 0,
+            "title": "Step Num",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "step_num"
+        ],
+        "title": "get_automation_step_detailsArguments",
+        "type": "object"
+      },
+      "name": "get_automation_step_details",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "get_automation_step_detailsDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Add a step to an automation branch through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "branch_id": {
+            "description": "Target branch identifier required by NetHunt editor RPC calls.",
+            "title": "Branch Id",
+            "type": "integer"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "description": "NetHunt editor payload for the new automation step.",
+            "title": "Payload",
+            "type": "object"
+          },
+          "role": {
+            "description": "NetHunt step role such as `TRIGGER`, `ACTION`, or `SPLIT`.",
+            "title": "Role",
+            "type": "string"
+          },
+          "step_type": {
+            "description": "NetHunt automation step type such as `CREATE_TASK`, `UPDATE_RECORD2`, or `FILTER_RECORD`.",
+            "title": "Step Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "step_type",
+          "payload",
+          "branch_id",
+          "role"
+        ],
+        "title": "add_automation_stepArguments",
+        "type": "object"
+      },
+      "name": "add_automation_step",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "add_automation_stepDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Update one automation step through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "branch_id": {
+            "description": "Target branch identifier required by NetHunt editor RPC calls.",
+            "title": "Branch Id",
+            "type": "integer"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "description": "NetHunt editor payload with the step option changes to apply.",
+            "title": "Payload",
+            "type": "object"
+          },
+          "step_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional stable step identifier. Pass it when NetHunt requires both `stepNum` and `stepId`.",
+            "title": "Step Id"
+          },
+          "step_num": {
+            "description": "Automation step number within the branch.",
+            "minimum": 0,
+            "title": "Step Num",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "step_num",
+          "payload",
+          "branch_id"
+        ],
+        "title": "update_automation_stepArguments",
+        "type": "object"
+      },
+      "name": "update_automation_step",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "update_automation_stepDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Delete one automation step or split branch through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "child_branch_num": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional child branch number used when deleting split branches.",
+            "title": "Child Branch Num"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional NetHunt delete-step payload for advanced editor cases.",
+            "title": "Payload"
+          },
+          "step_num": {
+            "description": "Automation step number within the branch.",
+            "minimum": 0,
+            "title": "Step Num",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "step_num"
+        ],
+        "title": "delete_automation_stepArguments",
+        "type": "object"
+      },
+      "name": "delete_automation_step",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "delete_automation_stepDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Add a split node after an automation step through the NetHunt editor RPC wrapper. Requires confirmation.",
+      "inputSchema": {
+        "properties": {
+          "automation_id": {
+            "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+            "title": "Automation Id",
+            "type": "string"
+          },
+          "confirm_write": {
+            "default": false,
+            "description": "Explicit confirmation flag required for mutating write operations.",
+            "title": "Confirm Write",
+            "type": "boolean"
+          },
+          "kind": {
+            "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional NetHunt editor payload used when adding a split node.",
+            "title": "Payload"
+          },
+          "step_num": {
+            "description": "Automation step number within the branch.",
+            "minimum": 0,
+            "title": "Step Num",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "automation_id",
+          "step_num"
+        ],
+        "title": "add_automation_splitArguments",
+        "type": "object"
+      },
+      "name": "add_automation_split",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "add_automation_splitDictOutput",
+        "type": "object"
+      }
+    }
+  ]
+}

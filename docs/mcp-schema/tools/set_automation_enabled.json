@@ -1,0 +1,41 @@
+{
+  "description": "Set the enabled state of an automation through its configured lifecycle operation. Requires confirmation.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "enabled": {
+        "description": "Target enabled state for the automation.",
+        "title": "Enabled",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id",
+      "enabled"
+    ],
+    "title": "set_automation_enabledArguments",
+    "type": "object"
+  },
+  "name": "set_automation_enabled",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "set_automation_enabledDictOutput",
+    "type": "object"
+  }
+}

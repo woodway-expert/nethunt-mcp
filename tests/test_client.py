@@ -4,6 +4,7 @@ import httpx
 import pytest
 import respx
 
+from nethunt_mcp.automation_client import NetHuntAutomationClient
 from nethunt_mcp.client import NetHuntClient
 from nethunt_mcp.config import Settings
 from nethunt_mcp.errors import NethuntMCPError
@@ -74,3 +75,27 @@ async def test_client_normalizes_network_errors() -> None:
         await client.close()
 
     assert exc_info.value.code == "network_error"
+
+
+@pytest.mark.asyncio
+async def test_automation_client_uses_cookie_and_extra_headers() -> None:
+    settings = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "NETHUNT_AUTOMATION_BASE_URL": "https://app.nethunt.com",
+            "NETHUNT_AUTOMATION_COOKIE": "session=abc",
+            "NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON": '{"X-CSRF-Token":"csrf"}',
+        }
+    )
+    route_url = "https://app.nethunt.com/api/workflows"
+    with respx.mock(assert_all_called=True) as router:
+        route = router.get(route_url).mock(return_value=httpx.Response(200, json={"items": []}))
+        client = NetHuntAutomationClient(settings, retry_backoff_seconds=0)
+        result = await client.request_json("GET", "/api/workflows", retryable=True)
+        request = route.calls[0].request
+        await client.close()
+
+    assert result == {"items": []}
+    assert request.headers["Cookie"] == "session=abc"
+    assert request.headers["X-CSRF-Token"] == "csrf"

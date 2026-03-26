@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import json
 
 import pytest
 
@@ -49,5 +50,52 @@ def test_settings_reject_invalid_transport() -> None:
                 "NETHUNT_EMAIL": "crm@example.com",
                 "NETHUNT_API_KEY": "secret",
                 "MCP_TRANSPORT": "sse",
+            }
+        )
+
+
+def test_settings_parse_automation_options() -> None:
+    settings = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "NETHUNT_AUTOMATION_BASE_URL": "https://app.nethunt.com",
+            "NETHUNT_AUTOMATION_COOKIE": "session=abc",
+            "NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON": json.dumps({"X-CSRF-Token": "csrf"}),
+            "NETHUNT_AUTOMATION_MANIFEST_JSON": json.dumps(
+                {
+                    "workflow": {
+                        "operations": {
+                            "list": {"method": "GET", "path": "/api/workflows"},
+                            "get": {"method": "GET", "path": "/api/workflows/{automation_id}"},
+                            "create": {"method": "POST", "path": "/api/workflows"},
+                            "update": {"method": "PUT", "path": "/api/workflows/{automation_id}"},
+                            "delete": {"method": "DELETE", "path": "/api/workflows/{automation_id}"},
+                            "set_enabled": {"method": "PATCH", "path": "/api/workflows/{automation_id}/state"},
+                        },
+                        "editor_operations": {
+                            "rename": {"method": "POST", "path": "/api/command"},
+                        },
+                    }
+                }
+            ),
+        }
+    )
+
+    assert settings.nethunt_automation_base_url == "https://app.nethunt.com"
+    assert settings.nethunt_automation_cookie == "session=abc"
+    assert settings.nethunt_automation_extra_headers == {"X-CSRF-Token": "csrf"}
+    assert "workflow" in settings.nethunt_automation_manifest
+    assert "rename" in settings.nethunt_automation_manifest["workflow"]["editor_operations"]
+    assert settings.automation_configured is True
+
+
+def test_settings_reject_non_string_automation_headers() -> None:
+    with pytest.raises(ConfigError):
+        Settings.from_env(
+            {
+                "NETHUNT_EMAIL": "crm@example.com",
+                "NETHUNT_API_KEY": "secret",
+                "NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON": json.dumps({"X-CSRF-Token": 123}),
             }
         )

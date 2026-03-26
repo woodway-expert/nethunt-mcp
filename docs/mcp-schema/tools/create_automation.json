@@ -1,0 +1,36 @@
+{
+  "description": "Create a new automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+  "inputSchema": {
+    "properties": {
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      },
+      "payload": {
+        "additionalProperties": true,
+        "description": "Manifest-specific payload for the automation create operation.",
+        "title": "Payload",
+        "type": "object"
+      }
+    },
+    "required": [
+      "kind",
+      "payload"
+    ],
+    "title": "create_automationArguments",
+    "type": "object"
+  },
+  "name": "create_automation",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "create_automationDictOutput",
+    "type": "object"
+  }
+}

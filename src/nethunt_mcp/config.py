@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import base64
+import json
 import os
 from dataclasses import dataclass, field
-from typing import Mapping
+from typing import Any, Mapping
 
 from .errors import ConfigError
 
@@ -12,7 +13,7 @@ DEFAULT_TIMEZONE = "Europe/Kiev"
 DEFAULT_LOG_LEVEL = "INFO"
 DEFAULT_TRANSPORT = "stdio"
 DEFAULT_HOST = "127.0.0.1"
-DEFAULT_PORT = 8000
+DEFAULT_PORT = 18044
 DEFAULT_TIMEOUT_SECONDS = 15.0
 SUPPORTED_TRANSPORTS = {"stdio", "streamable-http"}
 
@@ -22,6 +23,10 @@ class Settings:
     nethunt_email: str
     nethunt_api_key: str = field(repr=False)
     nethunt_base_url: str = DEFAULT_BASE_URL
+    nethunt_automation_base_url: str = DEFAULT_BASE_URL
+    nethunt_automation_cookie: str = field(default="", repr=False)
+    nethunt_automation_extra_headers: dict[str, str] = field(default_factory=dict, repr=False)
+    nethunt_automation_manifest: dict[str, Any] = field(default_factory=dict, repr=False)
     nethunt_timezone: str = DEFAULT_TIMEZONE
     nethunt_log_level: str = DEFAULT_LOG_LEVEL
     mcp_transport: str = DEFAULT_TRANSPORT
@@ -32,6 +37,10 @@ class Settings:
     @property
     def api_base_url(self) -> str:
         return f"{self.nethunt_base_url.rstrip('/')}/api/v1/zapier"
+
+    @property
+    def automation_configured(self) -> bool:
+        return bool(self.nethunt_automation_cookie and self.nethunt_automation_manifest)
 
     @property
     def basic_auth_header_value(self) -> str:
@@ -80,13 +89,61 @@ class Settings:
                 details={"value": nethunt_base_url},
             )
 
+        nethunt_automation_base_url = values.get("NETHUNT_AUTOMATION_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_URL
+        if not nethunt_automation_base_url.startswith(("http://", "https://")):
+            raise ConfigError(
+                code="config_error",
+                message="NETHUNT_AUTOMATION_BASE_URL must start with http:// or https://.",
+                details={"value": nethunt_automation_base_url},
+            )
+
         return cls(
             nethunt_email=email,
             nethunt_api_key=api_key,
             nethunt_base_url=nethunt_base_url.rstrip("/"),
+            nethunt_automation_base_url=nethunt_automation_base_url.rstrip("/"),
+            nethunt_automation_cookie=values.get("NETHUNT_AUTOMATION_COOKIE", "").strip(),
+            nethunt_automation_extra_headers=_load_json_object(
+                values.get("NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON"),
+                "NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON",
+            ),
+            nethunt_automation_manifest=_load_json_object(
+                values.get("NETHUNT_AUTOMATION_MANIFEST_JSON"),
+                "NETHUNT_AUTOMATION_MANIFEST_JSON",
+            ),
             nethunt_timezone=values.get("NETHUNT_TIMEZONE", DEFAULT_TIMEZONE).strip() or DEFAULT_TIMEZONE,
             nethunt_log_level=values.get("NETHUNT_LOG_LEVEL", DEFAULT_LOG_LEVEL).strip() or DEFAULT_LOG_LEVEL,
             mcp_transport=mcp_transport,
             mcp_host=values.get("MCP_HOST", DEFAULT_HOST).strip() or DEFAULT_HOST,
             mcp_port=mcp_port,
         )
+
+
+def _load_json_object(raw: str | None, env_name: str) -> dict[str, Any]:
+    value = (raw or "").strip()
+    if not value:
+        return {}
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as exc:
+        raise ConfigError(
+            code="config_error",
+            message=f"{env_name} must be valid JSON.",
+            details={"value": value[:200]},
+        ) from exc
+    if not isinstance(parsed, dict):
+        raise ConfigError(
+            code="config_error",
+            message=f"{env_name} must decode to a JSON object.",
+        )
+    if env_name == "NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON":
+        normalized_headers: dict[str, str] = {}
+        for key, value in parsed.items():
+            if not isinstance(key, str) or not isinstance(value, str):
+                raise ConfigError(
+                    code="config_error",
+                    message=f"{env_name} must contain only string keys and values.",
+                )
+            normalized_headers[key] = value
+        return normalized_headers
+    return parsed

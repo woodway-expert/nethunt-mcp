@@ -1,0 +1,37 @@
+{
+  "description": "Execute an allowlisted raw GET helper for gaps not yet covered by higher-level MCP tools.",
+  "inputSchema": {
+    "properties": {
+      "operation": {
+        "description": "Name of an allowlisted raw operation defined by this MCP server.",
+        "title": "Operation",
+        "type": "string"
+      },
+      "params": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional raw parameter object, including path placeholders and query values.",
+        "title": "Params"
+      }
+    },
+    "required": [
+      "operation"
+    ],
+    "title": "raw_getArguments",
+    "type": "object"
+  },
+  "name": "raw_get",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "raw_getDictOutput",
+    "type": "object"
+  }
+}

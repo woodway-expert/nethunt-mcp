@@ -1,0 +1,35 @@
+{
+  "description": "Fetch one automation by ID. Optionally include a normalized branch graph with stable branch and step IDs.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "include_branches": {
+        "default": false,
+        "description": "When true, include the normalized branch and step graph with stable IDs in the automation response.",
+        "title": "Include Branches",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id"
+    ],
+    "title": "get_automationArguments",
+    "type": "object"
+  },
+  "name": "get_automation",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "get_automationDictOutput",
+    "type": "object"
+  }
+}

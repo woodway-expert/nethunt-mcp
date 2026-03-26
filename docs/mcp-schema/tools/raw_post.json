@@ -1,0 +1,43 @@
+{
+  "description": "Execute an allowlisted raw POST helper. This always requires `confirm_write=true` to perform the mutation.",
+  "inputSchema": {
+    "properties": {
+      "body": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional raw request body object for the allowlisted POST operation.",
+        "title": "Body"
+      },
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "operation": {
+        "description": "Name of an allowlisted raw operation defined by this MCP server.",
+        "title": "Operation",
+        "type": "string"
+      }
+    },
+    "required": [
+      "operation"
+    ],
+    "title": "raw_postArguments",
+    "type": "object"
+  },
+  "name": "raw_post",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "raw_postDictOutput",
+    "type": "object"
+  }
+}

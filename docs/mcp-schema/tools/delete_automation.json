@@ -1,0 +1,41 @@
+{
+  "description": "Delete an automation. This tool requires explicit `confirm=true` and returns a preview before execution.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "confirm": {
+        "default": false,
+        "description": "Explicit confirmation flag required for destructive delete operations.",
+        "title": "Confirm",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      },
+      "preview_only": {
+        "default": false,
+        "description": "When true, only compute the delete preview and do not execute the delete.",
+        "title": "Preview Only",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id"
+    ],
+    "title": "delete_automationArguments",
+    "type": "object"
+  },
+  "name": "delete_automation",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "delete_automationDictOutput",
+    "type": "object"
+  }
+}

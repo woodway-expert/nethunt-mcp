@@ -1,0 +1,69 @@
+{
+  "description": "Delete one automation step or split branch through the NetHunt editor RPC wrapper. Requires confirmation.",
+  "inputSchema": {
+    "properties": {
+      "automation_id": {
+        "description": "Automation identifier returned by `list_automations`, `get_automation`, or automation write previews.",
+        "title": "Automation Id",
+        "type": "string"
+      },
+      "child_branch_num": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional child branch number used when deleting split branches.",
+        "title": "Child Branch Num"
+      },
+      "confirm_write": {
+        "default": false,
+        "description": "Explicit confirmation flag required for mutating write operations.",
+        "title": "Confirm Write",
+        "type": "boolean"
+      },
+      "kind": {
+        "description": "Configured automation kind, for example `workflow`. Discover supported values with `list_automation_kinds`.",
+        "title": "Kind",
+        "type": "string"
+      },
+      "payload": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional NetHunt delete-step payload for advanced editor cases.",
+        "title": "Payload"
+      },
+      "step_num": {
+        "description": "Automation step number within the branch.",
+        "minimum": 0,
+        "title": "Step Num",
+        "type": "integer"
+      }
+    },
+    "required": [
+      "kind",
+      "automation_id",
+      "step_num"
+    ],
+    "title": "delete_automation_stepArguments",
+    "type": "object"
+  },
+  "name": "delete_automation_step",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "delete_automation_stepDictOutput",
+    "type": "object"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "description": "List NetHunt folders the current user can write to when creating records or authoring actions.",
+  "inputSchema": {
+    "properties": {
+      "refresh": {
+        "default": false,
+        "description": "Refresh cached discovery metadata instead of reusing the last cached response.",
+        "title": "Refresh",
+        "type": "boolean"
+      }
+    },
+    "title": "list_writable_foldersArguments",
+    "type": "object"
+  },
+  "name": "list_writable_folders",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "list_writable_foldersDictOutput",
+    "type": "object"
+  }
+}

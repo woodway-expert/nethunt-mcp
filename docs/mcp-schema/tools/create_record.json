@@ -1,0 +1,43 @@
+{
+  "description": "Create a new record in a folder from a field-name to value mapping.",
+  "inputSchema": {
+    "properties": {
+      "fields": {
+        "additionalProperties": true,
+        "description": "Mapping of NetHunt field names to values for the new record.",
+        "title": "Fields",
+        "type": "object"
+      },
+      "folder_id": {
+        "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+        "title": "Folder Id",
+        "type": "string"
+      },
+      "time_zone": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional IANA time zone name such as `Europe/Kiev` used when creating records.",
+        "title": "Time Zone"
+      }
+    },
+    "required": [
+      "folder_id",
+      "fields"
+    ],
+    "title": "create_recordArguments",
+    "type": "object"
+  },
+  "name": "create_record",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "create_recordDictOutput",
+    "type": "object"
+  }
+}

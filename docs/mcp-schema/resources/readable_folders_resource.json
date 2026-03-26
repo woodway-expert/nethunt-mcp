@@ -1,0 +1,6 @@
+{
+  "description": "JSON snapshot of the readable folder catalog, equivalent to `list_readable_folders(refresh=false)`.",
+  "mimeType": "text/plain",
+  "name": "readable_folders_resource",
+  "uri": "nethunt://folders/readable"
+}

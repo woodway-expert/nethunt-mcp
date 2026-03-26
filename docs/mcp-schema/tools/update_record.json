@@ -1,0 +1,71 @@
+{
+  "description": "Update an existing record using set/add/remove field actions expressed by field name.",
+  "inputSchema": {
+    "properties": {
+      "add_fields": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Field-name to value mapping for additive updates.",
+        "title": "Add Fields"
+      },
+      "overwrite_default": {
+        "default": false,
+        "description": "When true, update actions overwrite fields by default unless an individual action says otherwise.",
+        "title": "Overwrite Default",
+        "type": "boolean"
+      },
+      "record_id": {
+        "description": "NetHunt record identifier returned by record feeds, search, or create operations.",
+        "title": "Record Id",
+        "type": "string"
+      },
+      "remove_fields": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Field-name to value mapping for remove actions.",
+        "title": "Remove Fields"
+      },
+      "set_fields": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Field-name to value mapping for overwrite-style updates.",
+        "title": "Set Fields"
+      }
+    },
+    "required": [
+      "record_id"
+    ],
+    "title": "update_recordArguments",
+    "type": "object"
+  },
+  "name": "update_record",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "update_recordDictOutput",
+    "type": "object"
+  }
+}

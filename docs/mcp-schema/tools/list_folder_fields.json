@@ -1,0 +1,29 @@
+{
+  "description": "List fields for a folder and enrich them with stable IDs, option metadata, reference counts, and provenance when available.",
+  "inputSchema": {
+    "properties": {
+      "folder_id": {
+        "description": "NetHunt folder identifier. Discover valid values with `list_readable_folders` or `list_writable_folders`.",
+        "title": "Folder Id",
+        "type": "string"
+      },
+      "refresh": {
+        "default": false,
+        "description": "Refresh cached discovery metadata instead of reusing the last cached response.",
+        "title": "Refresh",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "folder_id"
+    ],
+    "title": "list_folder_fieldsArguments",
+    "type": "object"
+  },
+  "name": "list_folder_fields",
+  "outputSchema": {
+    "additionalProperties": true,
+    "title": "list_folder_fieldsDictOutput",
+    "type": "object"
+  }
+}
