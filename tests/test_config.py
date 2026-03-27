@@ -99,3 +99,55 @@ def test_settings_reject_non_string_automation_headers() -> None:
                 "NETHUNT_AUTOMATION_EXTRA_HEADERS_JSON": json.dumps({"X-CSRF-Token": 123}),
             }
         )
+
+
+def test_settings_parse_mcp_api_key() -> None:
+    settings_http = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "MCP_TRANSPORT": "streamable-http",
+            "MCP_API_KEY": "my-bearer-token",
+            "MCP_SERVER_URL": "https://mcp.example.com",
+        }
+    )
+
+    assert settings_http.mcp_api_key == "my-bearer-token"
+    assert settings_http.mcp_server_url == "https://mcp.example.com"
+    assert settings_http.auth_configured is True
+
+    settings_stdio = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "MCP_API_KEY": "my-bearer-token",
+        }
+    )
+
+    assert settings_stdio.auth_configured is False
+
+
+def test_settings_mcp_api_key_auto_derives_server_url() -> None:
+    settings = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "MCP_TRANSPORT": "streamable-http",
+            "MCP_HOST": "127.0.0.1",
+            "MCP_PORT": "18044",
+            "MCP_API_KEY": "my-bearer-token",
+        }
+    )
+
+    assert settings.mcp_server_url == "http://127.0.0.1:18044"
+
+
+def test_settings_rejects_invalid_server_url() -> None:
+    with pytest.raises(ConfigError):
+        Settings.from_env(
+            {
+                "NETHUNT_EMAIL": "crm@example.com",
+                "NETHUNT_API_KEY": "secret",
+                "MCP_SERVER_URL": "not-a-url",
+            }
+        )

@@ -404,3 +404,33 @@ async def test_resource_descriptions_are_registered() -> None:
     resource = await app.server._resource_manager.get_resource("nethunt://folders/readable")
 
     assert resource.description == "JSON snapshot of the readable folder catalog, equivalent to `list_readable_folders(refresh=false)`."
+
+
+def test_server_builds_with_auth_when_api_key_configured() -> None:
+    settings = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "MCP_TRANSPORT": "streamable-http",
+            "MCP_API_KEY": "bearer-token",
+            "MCP_SERVER_URL": "https://mcp.example.com",
+        }
+    )
+
+    app = NetHuntMCPApplication(FakeService(), settings)
+
+    assert app.server._token_verifier is not None
+
+
+def test_server_builds_without_auth_for_stdio() -> None:
+    settings = Settings.from_env(
+        {
+            "NETHUNT_EMAIL": "crm@example.com",
+            "NETHUNT_API_KEY": "secret",
+            "MCP_API_KEY": "bearer-token",
+        }
+    )
+
+    app = NetHuntMCPApplication(FakeService(), settings)
+
+    assert app.server._token_verifier is None

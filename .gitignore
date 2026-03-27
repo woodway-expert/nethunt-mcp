@@ -32,3 +32,4 @@ build/
 networkdump*.txt
 terminals/
 agent-tools/
+.env.runtime

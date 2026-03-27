@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from nethunt_mcp.automation import AutomationRegistry
+from nethunt_mcp.automation import AutomationRegistry, render_template
 from nethunt_mcp.errors import ConfigError, ValidationError
 
 
@@ -77,3 +77,41 @@ def test_registry_rejects_unknown_editor_operation_lookup() -> None:
 
     with pytest.raises(ValidationError):
         registry.require_kind("workflow").resolve_operation("missing", editor=True)
+
+
+def test_render_template_injects_scalar_payload_keys() -> None:
+    template = "/api/{service}/automations"
+    context = {
+        "kind": "workflow",
+        "payload": {"service": "automation", "nested": {"key": "val"}},
+    }
+
+    result = render_template(template, context)
+
+    assert result == "/api/automation/automations"
+
+
+def test_render_template_error_lists_available_variables() -> None:
+    template = "/api/{missing_var}/automations"
+    context = {"kind": "workflow", "payload": {"service": "automation"}}
+
+    with pytest.raises(ValidationError) as exc_info:
+        render_template(template, context)
+
+    assert exc_info.value.details is not None
+    assert exc_info.value.details["missing"] == "missing_var"
+    assert "available" in exc_info.value.details
+    assert "kind" in exc_info.value.details["available"]
+    assert "service" in exc_info.value.details["available"]
+
+
+def test_render_template_payload_cannot_shadow_context_keys() -> None:
+    template = "{kind}/test"
+    context = {
+        "kind": "workflow",
+        "payload": {"kind": "OVERRIDDEN"},
+    }
+
+    result = render_template(template, context)
+
+    assert result == "workflow/test"

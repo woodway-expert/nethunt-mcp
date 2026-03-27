@@ -1,5 +1,5 @@
 {
-  "description": "Update an existing automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+  "description": "Update an existing automation. The payload format is manifest-specific \u2014 call `list_automation_kinds` first and use the `samples.update` example for the chosen kind. Requires confirmation.",
   "inputSchema": {
     "properties": {
       "automation_id": {
@@ -20,7 +20,7 @@
       },
       "payload": {
         "additionalProperties": true,
-        "description": "Manifest-specific payload for the automation update operation.",
+        "description": "Manifest-specific payload for the automation update operation. Call list_automation_kinds first and use the samples.update example for the chosen kind.",
         "title": "Payload",
         "type": "object"
       }

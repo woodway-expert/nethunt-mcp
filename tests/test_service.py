@@ -1315,3 +1315,105 @@ async def test_list_automations_supports_commands_array_payloads_and_indexed_res
             True,
         )
     ]
+
+
+@pytest.mark.asyncio
+async def test_deactivate_automation_requires_confirmation_to_execute() -> None:
+    automation_client = FakeAutomationClient(
+        responses={
+            ("POST", "/api/command"): {"ok": True},
+        }
+    )
+    service = NetHuntService(FakeClient(), make_automation_settings(), automation_client=automation_client)
+
+    preview = await service.deactivate_automation("workflow", "wf-1", confirm_write=False)
+    executed = await service.deactivate_automation("workflow", "wf-1", confirm_write=True)
+
+    assert preview["executed"] is False
+    assert preview["preview"]["path"] == "/api/command"
+    assert preview["preview"]["json"]["name"] == "deactivateAutomation"
+    assert executed["executed"] is True
+    assert executed["result"]["enabled"] is False
+    assert automation_client.calls == [
+        (
+            "POST",
+            "/api/command",
+            None,
+            {
+                "service": "automation",
+                "name": "deactivateAutomation",
+                "data": {
+                    "workspaceId": "6911d891768a235848ac5535",
+                    "automationId": "wf-1",
+                },
+            },
+            False,
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_update_automation_requires_confirmation_to_execute() -> None:
+    automation_client = FakeAutomationClient(
+        responses={
+            ("PUT", "/api/workflows/wf-1"): {
+                "item": {"id": "wf-1", "attributes": {"name": "Updated", "enabled": False}}
+            }
+        }
+    )
+    service = NetHuntService(FakeClient(), make_automation_settings(), automation_client=automation_client)
+    payload = {"attributes": {"name": "Updated", "enabled": False}}
+
+    preview = await service.update_automation("workflow", "wf-1", payload, confirm_write=False)
+    executed = await service.update_automation("workflow", "wf-1", payload, confirm_write=True)
+
+    assert preview["executed"] is False
+    assert preview["preview"]["method"] == "PUT"
+    assert preview["preview"]["path"] == "/api/workflows/wf-1"
+    assert executed["executed"] is True
+    assert executed["result"]["automationId"] == "wf-1"
+    assert executed["result"]["name"] == "Updated"
+    assert automation_client.calls == [
+        ("PUT", "/api/workflows/wf-1", None, payload, False),
+    ]
+
+
+@pytest.mark.asyncio
+async def test_add_automation_split_requires_confirmation() -> None:
+    automation_client = FakeAutomationClient(
+        responses={
+            ("POST", "/api/command"): {"ok": True},
+        }
+    )
+    service = NetHuntService(FakeClient(), make_automation_settings(), automation_client=automation_client)
+    split_payload = {"condition": "field_equals"}
+
+    preview = await service.add_automation_split(
+        "workflow", "wf-1", 2, split_payload, confirm_write=False,
+    )
+    executed = await service.add_automation_split(
+        "workflow", "wf-1", 2, split_payload, confirm_write=True,
+    )
+
+    assert preview["executed"] is False
+    assert preview["preview"]["json"]["name"] == "addSplit"
+    assert executed["executed"] is True
+    assert executed["result"]["stepNum"] == 2
+    assert automation_client.calls == [
+        (
+            "POST",
+            "/api/command",
+            None,
+            {
+                "service": "automation",
+                "name": "addSplit",
+                "data": {
+                    "workspaceId": "6911d891768a235848ac5535",
+                    "automationId": "wf-1",
+                    "stepNum": 2,
+                    "options": split_payload,
+                },
+            },
+            False,
+        )
+    ]

@@ -6,6 +6,8 @@ import logging
 from typing import Annotated, Any, TypeAlias
 
 from .automation_client import NetHuntAutomationClient
+from mcp.server.auth.provider import AccessToken
+from mcp.server.auth.settings import AuthSettings
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
@@ -153,11 +155,11 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "delete_record": "Delete a record. This tool always requires explicit `confirm=true` and returns a preview before execution.",
     "raw_get": "Execute an allowlisted raw GET helper for gaps not yet covered by higher-level MCP tools.",
     "raw_post": "Execute an allowlisted raw POST helper. This always requires `confirm_write=true` to perform the mutation.",
-    "list_automation_kinds": "List configured automation kinds, lifecycle operations, editor operations, and sample payloads supported by this MCP server.",
+    "list_automation_kinds": "List configured automation kinds, lifecycle operations, editor operations, and sample payloads. Always call this before create_automation or update_automation to discover the expected payload format from the `samples` field.",
     "list_automations": "List automations for one configured kind or for all kinds, including normalized imports and field reference summaries.",
     "get_automation": "Fetch one automation by ID. Optionally include a normalized branch graph with stable branch and step IDs.",
-    "create_automation": "Create a new automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
-    "update_automation": "Update an existing automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+    "create_automation": "Create a new automation. The payload format is manifest-specific — call `list_automation_kinds` first and use the `samples.create` example for the chosen kind. Requires confirmation.",
+    "update_automation": "Update an existing automation. The payload format is manifest-specific — call `list_automation_kinds` first and use the `samples.update` example for the chosen kind. Requires confirmation.",
     "delete_automation": "Delete an automation. This tool requires explicit `confirm=true` and returns a preview before execution.",
     "set_automation_enabled": "Set the enabled state of an automation through its configured lifecycle operation. Requires confirmation.",
     "activate_automation": "Activate an automation through the NetHunt editor RPC wrapper. Requires confirmation.",
@@ -184,10 +186,27 @@ def configure_logging(level: str) -> None:
     )
 
 
+class StaticTokenVerifier:
+    def __init__(self, token: str) -> None:
+        self._token = token
+
+    async def verify_token(self, token: str) -> AccessToken | None:
+        if token == self._token:
+            return AccessToken(token=token, client_id="static", scopes=[])
+        return None
+
+
 class NetHuntMCPApplication:
     def __init__(self, service: NetHuntService, settings: Settings) -> None:
         self.service = service
         self.settings = settings
+        auth_kwargs: dict[str, Any] = {}
+        if settings.auth_configured:
+            auth_kwargs["token_verifier"] = StaticTokenVerifier(settings.mcp_api_key)
+            auth_kwargs["auth"] = AuthSettings(
+                issuer_url=settings.mcp_server_url,
+                resource_server_url=None,
+            )
         self.server = FastMCP(
             "NetHunt CRM",
             instructions=(
@@ -198,6 +217,7 @@ class NetHuntMCPApplication:
             host=settings.mcp_host,
             port=settings.mcp_port,
             json_response=True,
+            **auth_kwargs,
         )
         self._register_tools()
         self._register_resources()
@@ -501,32 +521,15 @@ class NetHuntMCPApplication:
         kind: AutomationKind,
         payload: Annotated[
             dict[str, Any],
-            Field(description="Manifest-specific payload for the automation create operation."),
+            Field(description="Manifest-specific payload for the automation create operation. Call list_automation_kinds first and use the samples.create example for the chosen kind."),
         ],
         confirm_write: ConfirmWriteFlag = False,
     ) -> dict[str, Any]:
-        if not confirm_write:
-            preview = await self._execute(
-                "create_automation",
-                lambda: self.service.create_automation(kind, payload, confirm_write=False),
-                kind=kind,
-                confirm_write=confirm_write,
-            )
-            if preview["ok"]:
-                return self._error_response(
-                    NethuntMCPError(
-                        code="confirmation_required",
-                        message="Set confirm_write=true to create an automation.",
-                        details=preview["data"],
-                    ),
-                    "create_automation",
-                    kind=kind,
-                    confirm_write=confirm_write,
-                )
-            return preview
-        return await self._execute(
+        return await self._execute_confirmable_write(
             "create_automation",
+            lambda: self.service.create_automation(kind, payload, confirm_write=False),
             lambda: self.service.create_automation(kind, payload, confirm_write=True),
+            message="Set confirm_write=true to create an automation.",
             kind=kind,
             confirm_write=confirm_write,
         )
@@ -537,34 +540,15 @@ class NetHuntMCPApplication:
         automation_id: AutomationId,
         payload: Annotated[
             dict[str, Any],
-            Field(description="Manifest-specific payload for the automation update operation."),
+            Field(description="Manifest-specific payload for the automation update operation. Call list_automation_kinds first and use the samples.update example for the chosen kind."),
         ],
         confirm_write: ConfirmWriteFlag = False,
     ) -> dict[str, Any]:
-        if not confirm_write:
-            preview = await self._execute(
-                "update_automation",
-                lambda: self.service.update_automation(kind, automation_id, payload, confirm_write=False),
-                kind=kind,
-                automation_id=automation_id,
-                confirm_write=confirm_write,
-            )
-            if preview["ok"]:
-                return self._error_response(
-                    NethuntMCPError(
-                        code="confirmation_required",
-                        message="Set confirm_write=true to update an automation.",
-                        details=preview["data"],
-                    ),
-                    "update_automation",
-                    kind=kind,
-                    automation_id=automation_id,
-                    confirm_write=confirm_write,
-                )
-            return preview
-        return await self._execute(
+        return await self._execute_confirmable_write(
             "update_automation",
+            lambda: self.service.update_automation(kind, automation_id, payload, confirm_write=False),
             lambda: self.service.update_automation(kind, automation_id, payload, confirm_write=True),
+            message="Set confirm_write=true to update an automation.",
             kind=kind,
             automation_id=automation_id,
             confirm_write=confirm_write,

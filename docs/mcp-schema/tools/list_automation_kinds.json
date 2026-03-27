@@ -1,5 +1,5 @@
 {
-  "description": "List configured automation kinds, lifecycle operations, editor operations, and sample payloads supported by this MCP server.",
+  "description": "List configured automation kinds, lifecycle operations, editor operations, and sample payloads. Always call this before create_automation or update_automation to discover the expected payload format from the `samples` field.",
   "inputSchema": {
     "properties": {},
     "title": "list_automation_kindsArguments",

@@ -208,14 +208,20 @@ def render_template(template: Any, context: Mapping[str, Any]) -> Any:
         if template.startswith(TOKEN_PREFIX) and template.count("{") == 0:
             return context.get(template[1:])
         format_context = {key: value for key, value in context.items() if _is_format_safe(value)}
+        payload = context.get("payload")
+        if isinstance(payload, Mapping):
+            for k, v in payload.items():
+                if _is_format_safe(v) and k not in format_context:
+                    format_context[k] = v
         try:
             return template.format(**format_context)
         except KeyError as exc:
             missing = str(exc).strip("'")
             raise ValidationError(
                 code="validation_error",
-                message="Missing template context for automation operation.",
-                details={"missing": missing},
+                message=f"Template variable '{{{missing}}}' is not available. "
+                        "Use $variable for whole-value substitution or pass the value inside the payload.",
+                details={"missing": missing, "available": sorted(format_context)},
             ) from exc
     return template
 

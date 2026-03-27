@@ -32,6 +32,8 @@ class Settings:
     mcp_transport: str = DEFAULT_TRANSPORT
     mcp_host: str = DEFAULT_HOST
     mcp_port: int = DEFAULT_PORT
+    mcp_api_key: str = field(default="", repr=False)
+    mcp_server_url: str = ""
     timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS
 
     @property
@@ -41,6 +43,10 @@ class Settings:
     @property
     def automation_configured(self) -> bool:
         return bool(self.nethunt_automation_cookie and self.nethunt_automation_manifest)
+
+    @property
+    def auth_configured(self) -> bool:
+        return bool(self.mcp_api_key) and self.mcp_transport == "streamable-http"
 
     @property
     def basic_auth_header_value(self) -> str:
@@ -97,6 +103,18 @@ class Settings:
                 details={"value": nethunt_automation_base_url},
             )
 
+        mcp_host = values.get("MCP_HOST", DEFAULT_HOST).strip() or DEFAULT_HOST
+        mcp_api_key = values.get("MCP_API_KEY", "").strip()
+        mcp_server_url = values.get("MCP_SERVER_URL", "").strip()
+        if mcp_server_url and not mcp_server_url.startswith(("http://", "https://")):
+            raise ConfigError(
+                code="config_error",
+                message="MCP_SERVER_URL must start with http:// or https://.",
+                details={"value": mcp_server_url},
+            )
+        if mcp_api_key and not mcp_server_url:
+            mcp_server_url = f"http://{mcp_host}:{mcp_port}"
+
         return cls(
             nethunt_email=email,
             nethunt_api_key=api_key,
@@ -114,8 +132,10 @@ class Settings:
             nethunt_timezone=values.get("NETHUNT_TIMEZONE", DEFAULT_TIMEZONE).strip() or DEFAULT_TIMEZONE,
             nethunt_log_level=values.get("NETHUNT_LOG_LEVEL", DEFAULT_LOG_LEVEL).strip() or DEFAULT_LOG_LEVEL,
             mcp_transport=mcp_transport,
-            mcp_host=values.get("MCP_HOST", DEFAULT_HOST).strip() or DEFAULT_HOST,
+            mcp_host=mcp_host,
             mcp_port=mcp_port,
+            mcp_api_key=mcp_api_key,
+            mcp_server_url=mcp_server_url,
         )
 
 

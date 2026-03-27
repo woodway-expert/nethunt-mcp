@@ -797,7 +797,7 @@ class NetHuntService:
     async def _load_folder_fields(self, folder_id: str, *, refresh: bool) -> list[dict[str, Any]]:
         raw_fields = await self._fetch_raw_folder_fields(folder_id, refresh=refresh)
         references_by_id: dict[str, dict[str, Any]] = {}
-        if self.settings.nethunt_automation_cookie:
+        if self.settings.automation_configured:
             try:
                 references_by_id = {
                     item["fieldId"]: item

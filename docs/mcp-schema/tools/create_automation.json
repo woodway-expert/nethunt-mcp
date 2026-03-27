@@ -1,5 +1,5 @@
 {
-  "description": "Create a new automation using the manifest-specific payload for the selected automation kind. Requires confirmation.",
+  "description": "Create a new automation. The payload format is manifest-specific \u2014 call `list_automation_kinds` first and use the `samples.create` example for the chosen kind. Requires confirmation.",
   "inputSchema": {
     "properties": {
       "confirm_write": {
@@ -15,7 +15,7 @@
       },
       "payload": {
         "additionalProperties": true,
-        "description": "Manifest-specific payload for the automation create operation.",
+        "description": "Manifest-specific payload for the automation create operation. Call list_automation_kinds first and use the samples.create example for the chosen kind.",
         "title": "Payload",
         "type": "object"
       }
