@@ -6,8 +6,20 @@ import logging
 from typing import Annotated, Any, TypeAlias
 
 from .automation_client import NetHuntAutomationClient
-from mcp.server.auth.provider import AccessToken
+import secrets
+import time
+
+from mcp.server.auth.provider import (
+    AccessToken,
+    AuthorizationCode,
+    AuthorizationParams,
+    RefreshToken,
+    TokenError,
+    construct_redirect_uri,
+)
 from mcp.server.auth.settings import AuthSettings
+from mcp.shared.auth import OAuthClientInformationFull, OAuthToken
+from pydantic import AnyUrl
 from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 
@@ -186,14 +198,86 @@ def configure_logging(level: str) -> None:
     )
 
 
-class StaticTokenVerifier:
-    def __init__(self, token: str) -> None:
-        self._token = token
+class _PermissiveClient(OAuthClientInformationFull):
+    """OAuth client that accepts any redirect URI and scope — single-user server."""
 
-    async def verify_token(self, token: str) -> AccessToken | None:
-        if token == self._token:
+    def validate_redirect_uri(self, redirect_uri: AnyUrl | None) -> AnyUrl:
+        if redirect_uri is None:
+            raise Exception("redirect_uri is required")
+        return redirect_uri
+
+    def validate_scope(self, requested_scope: str | None) -> list[str] | None:
+        return requested_scope.split(" ") if requested_scope else None
+
+
+class SingleUserOAuthProvider:
+    """Minimal OAuth 2.0 server for a personal single-user MCP deployment.
+
+    Auto-approves all PKCE authorization requests without a login page.
+    The issued access token is the static MCP_API_KEY value.
+    Suitable for single-owner servers where the URL is kept private.
+    """
+
+    def __init__(self, api_key: str) -> None:
+        self._api_key = api_key
+        self._clients: dict[str, OAuthClientInformationFull] = {}
+        self._codes: dict[str, AuthorizationCode] = {}
+
+    async def get_client(self, client_id: str) -> OAuthClientInformationFull | None:
+        if client_id not in self._clients:
+            self._clients[client_id] = _PermissiveClient(
+                client_id=client_id,
+                redirect_uris=None,
+                grant_types=["authorization_code"],
+                token_endpoint_auth_method="none",
+            )
+        return self._clients[client_id]
+
+    async def register_client(self, client_info: OAuthClientInformationFull) -> None:
+        self._clients[client_info.client_id] = client_info
+
+    async def authorize(self, client: OAuthClientInformationFull, params: AuthorizationParams) -> str:
+        code = secrets.token_urlsafe(32)
+        self._codes[code] = AuthorizationCode(
+            code=code,
+            scopes=params.scopes or [],
+            expires_at=time.time() + 300,
+            client_id=client.client_id,
+            code_challenge=params.code_challenge,
+            redirect_uri=params.redirect_uri,
+            redirect_uri_provided_explicitly=params.redirect_uri_provided_explicitly,
+            resource=params.resource,
+        )
+        return construct_redirect_uri(str(params.redirect_uri), code=code, state=params.state)
+
+    async def load_authorization_code(
+        self, client: OAuthClientInformationFull, authorization_code: str
+    ) -> AuthorizationCode | None:
+        return self._codes.get(authorization_code)
+
+    async def exchange_authorization_code(
+        self, client: OAuthClientInformationFull, authorization_code: AuthorizationCode
+    ) -> OAuthToken:
+        self._codes.pop(authorization_code.code, None)
+        return OAuthToken(access_token=self._api_key, token_type="Bearer", expires_in=None)
+
+    async def load_refresh_token(
+        self, client: OAuthClientInformationFull, refresh_token: str
+    ) -> RefreshToken | None:
+        return None
+
+    async def exchange_refresh_token(
+        self, client: OAuthClientInformationFull, refresh_token: RefreshToken, scopes: list[str]
+    ) -> OAuthToken:
+        raise TokenError(error="unsupported_grant_type")
+
+    async def load_access_token(self, token: str) -> AccessToken | None:
+        if token == self._api_key:
             return AccessToken(token=token, client_id="static", scopes=[])
         return None
+
+    async def revoke_token(self, token: AccessToken | RefreshToken) -> None:
+        pass
 
 
 class NetHuntMCPApplication:
@@ -202,7 +286,7 @@ class NetHuntMCPApplication:
         self.settings = settings
         auth_kwargs: dict[str, Any] = {}
         if settings.auth_configured:
-            auth_kwargs["token_verifier"] = StaticTokenVerifier(settings.mcp_api_key)
+            auth_kwargs["auth_server_provider"] = SingleUserOAuthProvider(settings.mcp_api_key)
             auth_kwargs["auth"] = AuthSettings(
                 issuer_url=settings.mcp_server_url,
                 resource_server_url=None,
