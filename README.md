@@ -1,11 +1,14 @@
 # NetHunt CRM MCP Server
 
-Local MCP server for NetHunt CRM, built with Python and the official MCP Python SDK.
+Local MCP server for NetHunt CRM, built with Python and the official MCP Python SDK, plus an optional Telegram sidecar bot for natural-language control.
 
 ## Features
 
 - `stdio` by default for local Codex/CLI integrations
 - Optional `streamable-http` transport for Docker smoke tests and MCP Inspector
+- Optional `aiogram` Telegram bot sidecar that talks to the MCP server over `streamable-http`
+- OpenAI Responses API orchestration with `gpt-5.4`
+- Private-chat-only Telegram access controlled by `.env` allowlisted user IDs
 - Universal folder discovery across the current NetHunt workspace
 - Curated tools for auth, discovery, search, reads, comments, call logs, create, update, and delete
 - Optional automation tools for internal NetHunt workflow APIs via a separate cookie-auth client
@@ -33,10 +36,12 @@ Official references:
 - NetHunt API docs: https://nethunt.com/integration-api
 - API key help: https://help.nethunt.com/en/articles/4260105-where-to-get-nethunt-api-key
 - MCP Python SDK: https://py.sdk.modelcontextprotocol.io/
+- aiogram docs: https://docs.aiogram.dev/en/latest/
+- OpenAI Responses API: https://developers.openai.com/api/reference/resources/responses/methods/create
 
 ## Environment
 
-Copy `.env.example` or export the variables directly:
+Copy `.env.example` to `.env` or export the variables directly:
 
 ```powershell
 $env:NETHUNT_EMAIL = "you@example.com"
@@ -57,8 +62,18 @@ Available variables:
 - `MCP_TRANSPORT` default `stdio`
 - `MCP_HOST` default `127.0.0.1`
 - `MCP_PORT` default `18044`
+- `MCP_API_KEY` optional bearer token for `streamable-http` clients
+- `MCP_SERVER_URL` optional public server URL used for MCP OAuth metadata
+- `TELEGRAM_BOT_TOKEN` required for the Telegram sidecar bot
+- `TELEGRAM_ALLOWED_USER_IDS` required comma-separated Telegram numeric user IDs
+- `OPENAI_API_KEY` required for the Telegram sidecar bot
+- `OPENAI_MODEL` default `gpt-5.4`
+- `TELEGRAM_MCP_URL` default `http://127.0.0.1:18044/mcp`
+- `TELEGRAM_MCP_API_KEY` optional override, defaults to `MCP_API_KEY`
 
 Automation support uses a separate, thin wrapper over NetHunt's internal web API. It is disabled unless both `NETHUNT_AUTOMATION_COOKIE` and `NETHUNT_AUTOMATION_MANIFEST_JSON` are set.
+
+Both console entrypoints automatically load `.env` at startup when it exists.
 
 ## Native Setup
 
@@ -73,6 +88,19 @@ Run locally:
 ```powershell
 .\.venv\Scripts\nethunt-mcp
 ```
+
+Run the Telegram bot:
+
+```powershell
+.\.venv\Scripts\nethunt-telegram-bot
+```
+
+The Telegram bot:
+
+- accepts requests only in private chats
+- allows only users listed in `TELEGRAM_ALLOWED_USER_IDS`
+- keeps conversation memory and pending approvals in memory only
+- previews mutating actions before execution
 
 ## Codex Integration
 
@@ -148,13 +176,23 @@ docker run --rm -i `
   nethunt-mcp:latest
 ```
 
-Run in `streamable-http` mode for Inspector or reverse proxy testing:
+Run both the MCP HTTP service and the Telegram sidecar bot:
 
 ```powershell
 docker compose up --build
 ```
 
-The compose service listens on `http://127.0.0.1:18044/mcp`.
+The MCP service listens on `http://127.0.0.1:18044/mcp`. The Telegram bot runs as a second container and connects to the MCP service over the internal Compose network.
+
+## Telegram Bot Safety
+
+- The bot mirrors MCP tools into OpenAI function tools and executes them locally through the MCP client.
+- Read-only results are model-mediated.
+- Mutating tools never execute directly from the model.
+- `delete_record`, `delete_automation`, `raw_post`, and automation write tools use the MCP server's built-in preview/confirmation flow.
+- `create_record`, `update_record`, `create_record_comment`, and `create_call_log` use a host-generated preview because the underlying MCP tools do not expose a preview mode.
+- Every mutating request pauses for an explicit Telegram `Approve` / `Cancel` action before execution.
+- Pending approvals expire after 15 minutes.
 
 ## Tools
 

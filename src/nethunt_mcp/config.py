@@ -6,6 +6,8 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
+from dotenv import find_dotenv, load_dotenv
+
 from .errors import ConfigError
 
 DEFAULT_BASE_URL = "https://nethunt.com"
@@ -15,7 +17,20 @@ DEFAULT_TRANSPORT = "stdio"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 18044
 DEFAULT_TIMEOUT_SECONDS = 15.0
+DEFAULT_OPENAI_MODEL = "gpt-5.4"
+DEFAULT_TELEGRAM_MCP_URL = "http://127.0.0.1:18044/mcp"
 SUPPORTED_TRANSPORTS = {"stdio", "streamable-http"}
+_ENV_LOADED = False
+
+
+def load_runtime_env() -> None:
+    global _ENV_LOADED
+    if _ENV_LOADED:
+        return
+    env_path = find_dotenv(filename=".env", usecwd=True)
+    if env_path:
+        load_dotenv(env_path, override=False)
+    _ENV_LOADED = True
 
 
 @dataclass(slots=True, frozen=True)
@@ -55,6 +70,8 @@ class Settings:
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "Settings":
+        if env is None:
+            load_runtime_env()
         values = env or os.environ
         email = values.get("NETHUNT_EMAIL", "").strip()
         api_key = values.get("NETHUNT_API_KEY", "").strip()
@@ -139,6 +156,60 @@ class Settings:
         )
 
 
+@dataclass(slots=True, frozen=True)
+class TelegramBotSettings:
+    telegram_bot_token: str = field(repr=False)
+    telegram_allowed_user_ids: frozenset[int]
+    openai_api_key: str = field(repr=False)
+    openai_model: str = DEFAULT_OPENAI_MODEL
+    telegram_mcp_url: str = DEFAULT_TELEGRAM_MCP_URL
+    telegram_mcp_api_key: str = field(default="", repr=False)
+
+    @property
+    def mcp_auth_headers(self) -> dict[str, str]:
+        if not self.telegram_mcp_api_key:
+            return {}
+        return {"Authorization": f"Bearer {self.telegram_mcp_api_key}"}
+
+    @classmethod
+    def from_env(cls, env: Mapping[str, str] | None = None) -> "TelegramBotSettings":
+        if env is None:
+            load_runtime_env()
+        values = env or os.environ
+
+        bot_token = values.get("TELEGRAM_BOT_TOKEN", "").strip()
+        if not bot_token:
+            raise ConfigError(code="config_error", message="TELEGRAM_BOT_TOKEN is required.")
+
+        allowed_user_ids = _parse_allowed_user_ids(values.get("TELEGRAM_ALLOWED_USER_IDS", ""))
+        if not allowed_user_ids:
+            raise ConfigError(code="config_error", message="TELEGRAM_ALLOWED_USER_IDS is required.")
+
+        openai_api_key = values.get("OPENAI_API_KEY", "").strip()
+        if not openai_api_key:
+            raise ConfigError(code="config_error", message="OPENAI_API_KEY is required.")
+
+        openai_model = values.get("OPENAI_MODEL", DEFAULT_OPENAI_MODEL).strip() or DEFAULT_OPENAI_MODEL
+        telegram_mcp_url = values.get("TELEGRAM_MCP_URL", DEFAULT_TELEGRAM_MCP_URL).strip() or DEFAULT_TELEGRAM_MCP_URL
+        if not telegram_mcp_url.startswith(("http://", "https://")):
+            raise ConfigError(
+                code="config_error",
+                message="TELEGRAM_MCP_URL must start with http:// or https://.",
+                details={"value": telegram_mcp_url},
+            )
+
+        telegram_mcp_api_key = values.get("TELEGRAM_MCP_API_KEY", "").strip() or values.get("MCP_API_KEY", "").strip()
+
+        return cls(
+            telegram_bot_token=bot_token,
+            telegram_allowed_user_ids=frozenset(allowed_user_ids),
+            openai_api_key=openai_api_key,
+            openai_model=openai_model,
+            telegram_mcp_url=telegram_mcp_url,
+            telegram_mcp_api_key=telegram_mcp_api_key,
+        )
+
+
 def _load_json_object(raw: str | None, env_name: str) -> dict[str, Any]:
     value = (raw or "").strip()
     if not value:
@@ -167,3 +238,27 @@ def _load_json_object(raw: str | None, env_name: str) -> dict[str, Any]:
             normalized_headers[key] = value
         return normalized_headers
     return parsed
+
+
+def _parse_allowed_user_ids(raw: str) -> set[int]:
+    parsed_ids: set[int] = set()
+    for part in raw.split(","):
+        value = part.strip()
+        if not value:
+            continue
+        try:
+            user_id = int(value)
+        except ValueError as exc:
+            raise ConfigError(
+                code="config_error",
+                message="TELEGRAM_ALLOWED_USER_IDS must contain only integers.",
+                details={"value": value},
+            ) from exc
+        if user_id <= 0:
+            raise ConfigError(
+                code="config_error",
+                message="TELEGRAM_ALLOWED_USER_IDS must contain only positive integers.",
+                details={"value": value},
+            )
+        parsed_ids.add(user_id)
+    return parsed_ids

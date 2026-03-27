@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from nethunt_mcp.config import Settings
+from nethunt_mcp.config import Settings, TelegramBotSettings
 from nethunt_mcp.errors import ConfigError
 
 
@@ -151,3 +151,67 @@ def test_settings_rejects_invalid_server_url() -> None:
                 "MCP_SERVER_URL": "not-a-url",
             }
         )
+
+
+def test_telegram_bot_settings_read_required_fields() -> None:
+    settings = TelegramBotSettings.from_env(
+        {
+            "TELEGRAM_BOT_TOKEN": "token",
+            "TELEGRAM_ALLOWED_USER_IDS": "123, 456",
+            "OPENAI_API_KEY": "openai-secret",
+            "OPENAI_MODEL": "gpt-5.4",
+            "TELEGRAM_MCP_URL": "https://mcp.example.com/mcp",
+            "TELEGRAM_MCP_API_KEY": "mcp-secret",
+        }
+    )
+
+    assert settings.telegram_allowed_user_ids == frozenset({123, 456})
+    assert settings.openai_model == "gpt-5.4"
+    assert settings.telegram_mcp_url == "https://mcp.example.com/mcp"
+    assert settings.mcp_auth_headers == {"Authorization": "Bearer mcp-secret"}
+
+
+def test_telegram_bot_settings_require_allowed_user_ids() -> None:
+    with pytest.raises(ConfigError):
+        TelegramBotSettings.from_env(
+            {
+                "TELEGRAM_BOT_TOKEN": "token",
+                "OPENAI_API_KEY": "openai-secret",
+            }
+        )
+
+
+def test_telegram_bot_settings_reject_invalid_allowed_user_ids() -> None:
+    with pytest.raises(ConfigError):
+        TelegramBotSettings.from_env(
+            {
+                "TELEGRAM_BOT_TOKEN": "token",
+                "TELEGRAM_ALLOWED_USER_IDS": "123, not-a-number",
+                "OPENAI_API_KEY": "openai-secret",
+            }
+        )
+
+
+def test_telegram_bot_settings_reject_invalid_mcp_url() -> None:
+    with pytest.raises(ConfigError):
+        TelegramBotSettings.from_env(
+            {
+                "TELEGRAM_BOT_TOKEN": "token",
+                "TELEGRAM_ALLOWED_USER_IDS": "123",
+                "OPENAI_API_KEY": "openai-secret",
+                "TELEGRAM_MCP_URL": "localhost:18044/mcp",
+            }
+        )
+
+
+def test_telegram_bot_settings_fall_back_to_mcp_api_key() -> None:
+    settings = TelegramBotSettings.from_env(
+        {
+            "TELEGRAM_BOT_TOKEN": "token",
+            "TELEGRAM_ALLOWED_USER_IDS": "123",
+            "OPENAI_API_KEY": "openai-secret",
+            "MCP_API_KEY": "shared-secret",
+        }
+    )
+
+    assert settings.telegram_mcp_api_key == "shared-secret"

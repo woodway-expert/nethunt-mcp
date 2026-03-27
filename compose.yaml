@@ -5,7 +5,7 @@ services:
     image: nethunt-mcp:latest
     restart: unless-stopped
     env_file:
-      - path: .env.runtime
+      - path: .env
         format: raw
     environment:
       MCP_TRANSPORT: streamable-http
@@ -13,3 +13,15 @@ services:
       MCP_PORT: 18044
     ports:
       - "18044:18044"
+  nethunt-telegram-bot:
+    image: nethunt-mcp:latest
+    restart: unless-stopped
+    depends_on:
+      - nethunt-mcp-http
+    env_file:
+      - path: .env
+        format: raw
+    environment:
+      TELEGRAM_MCP_URL: http://nethunt-mcp-http:18044/mcp
+    entrypoint:
+      - nethunt-telegram-bot
